@@ -7,4 +7,69 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id       String    @id @default(cuid())
+  password String
+  email    String    @unique
+  name     String
+  role     String
+  projects Project[]
 
+  @@map("user")
+}
+
+model Project {
+  id          String @id @default(cuid())
+  name        String
+  description String
+  user        User   @relation(fields: [userId], references: [id])
+  userId      String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  column    Board[]
+
+  @@map("post")
+}
+
+model Board {
+  id          String  @id @default(cuid())
+  name        String
+  description String
+  project     Project @relation(fields: [projectId], references: [id])
+  projectId   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Column    Column[]
+
+  @@map("board")
+}
+
+model Column {
+  id          String @id @default(cuid())
+  name        String
+  description String
+  board       Board  @relation(fields: [boardId], references: [id])
+  boardId     String
+  wip         Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Card      Card[]
+
+  @@map("column")
+}
+
+model Card {
+  id          String @id @default(cuid())
+  name        String
+  description String
+  column      Column @relation(fields: [columnId], references: [id])
+  columnId    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("card")
+}
