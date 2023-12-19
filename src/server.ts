@@ -1,7 +1,8 @@
-import { PORT } from "./config/env";
-import app from "./app";
+import { app } from "./app";
 
-const port = PORT || 3000;
-app.listen(port, () => {
-  console.log(`Listening on ${port}`);
+const PORT = 3333;
+
+app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
+  console.log(`Server is listening on port ${PORT}`);
 });

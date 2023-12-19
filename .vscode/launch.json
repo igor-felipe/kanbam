@@ -1,20 +1,36 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        {
-            "name": "Debug",
-            "runtimeArgs": [
-                "run-script",
-                "debug"
-            ],
-            "runtimeExecutable": "npm",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "type": "node"
-        }
+    {
+        "type": "node-terminal",
+        "name": "Server HTTP",
+        "request": "launch",
+        "command": "nodemon --exec node --require sucrase/register ${workspaceFolder}/src/server.ts",
+        "cwd": "${workspaceFolder}",
+        "sourceMaps": true,
+        "envFile": "${workspaceFolder}/.env"
+    },
+    {
+        "type": "node-terminal",
+        "name": "Debug Current JS File",
+        "request": "launch",
+        "command": "nodemon --exec node --require sucrase/register ${fileBasename}",
+        "cwd": "${fileDirname}"
+    },
+    {
+        "type": "node-terminal",
+        "name": "Debug Current TS File",
+        "request": "launch",
+        "command": "nodemon --exec node --require sucrase/register ${fileBasename}",
+        "cwd": "${fileDirname}",
+        "sourceMaps": true,
+    },
+    {
+        "type": "node-terminal",
+        "name": "Debug Current Test File (yarn test)",
+        "request": "launch",
+        "command": "yarn test -- ${fileBasenameNoExtension}",
+        "cwd": "${fileDirname}"
+    }
     ]
 }
