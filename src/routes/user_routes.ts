@@ -7,9 +7,7 @@ const userRoutes = Router();
 
 userRoutes.post("/user/register", async (req, res, next) => {
   try {
-    res
-      .status(201)
-      .json(await pipe(req.body, V.createValidator.parse, UC.create));
+    res.status(201).json(await pipe(req.body, V.createValidator, UC.create));
   } catch (error) {
     next(error);
   }
@@ -17,9 +15,7 @@ userRoutes.post("/user/register", async (req, res, next) => {
 
 userRoutes.get("/user/:id", async (req, res, next) => {
   try {
-    res.json(
-      await pipe({ id: req.params.id }, V.getOneValidator.parse, UC.getOne),
-    );
+    res.json(await pipe({ id: req.params.id }, V.getOneValidator, UC.getOne));
   } catch (error) {
     next(error);
   }
@@ -27,7 +23,7 @@ userRoutes.get("/user/:id", async (req, res, next) => {
 
 userRoutes.get("/user", async (req, res, next) => {
   try {
-    res.json(await pipe(req.query, V.findManyValidator.parse, UC.findMany));
+    res.json(await pipe(req.query, V.findManyValidator, UC.findMany));
   } catch (error) {
     next(error);
   }
@@ -35,7 +31,13 @@ userRoutes.get("/user", async (req, res, next) => {
 
 userRoutes.put("/user", async (req, res, next) => {
   try {
-    res.json(await pipe(req.body, V.updateValidator.parse, UC.update));
+    res.json(
+      await pipe(
+        { ...req.body, id: req.auth.id },
+        V.updateValidator,
+        UC.update,
+      ),
+    );
   } catch (error) {
     next(error);
   }
@@ -43,7 +45,17 @@ userRoutes.put("/user", async (req, res, next) => {
 
 userRoutes.post("/user/login", async (req, res, next) => {
   try {
-    res.json(await pipe(req.body, V.loginValidator.parse, UC.login));
+    res.json(await pipe(req.body, V.loginValidator, UC.login));
+  } catch (error) {
+    next(error);
+  }
+});
+
+userRoutes.delete("/user", async (req, res, next) => {
+  try {
+    res.json(
+      await pipe({ id: req.auth.id }, V.deleteOneValidator, UC.deleteOne),
+    );
   } catch (error) {
     next(error);
   }

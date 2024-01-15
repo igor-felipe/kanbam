@@ -8,40 +8,53 @@ datasource db {
 }
 
 model User {
-  id       String    @id @default(cuid())
+  id       String @id @default(cuid())
   password String
-  email    String    @unique
+  email    String @unique
   name     String
-  role     String
-  projects Project[]
+
+  workspace workspace[]
+  Member    Member[]
 
   @@map("user")
 }
 
-model Project {
-  id          String @id @default(cuid())
-  name        String
-  description String
-  user        User   @relation(fields: [userId], references: [id])
+model workspace {
+  id   String @id @default(cuid())
+  name String
+
+  User   User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String
+  Member Member[]
+  Board  Board[]
+
+  @@unique([name, userId])
+  @@map("workspace")
+}
+
+model Member {
+  role        String
   userId      String
+  workspaceId String
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  column    Board[]
+  User      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  workspace workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
+  @@id([workspaceId, userId])
   @@map("post")
 }
 
 model Board {
-  id          String  @id @default(cuid())
+  id          String @id @default(cuid())
   name        String
   description String
-  project     Project @relation(fields: [projectId], references: [id])
-  projectId   String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Column    Column[]
+
+  Column      Column[]
+  workspace   workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  workspaceId String?
 
   @@map("board")
 }
@@ -50,13 +63,14 @@ model Column {
   id          String @id @default(cuid())
   name        String
   description String
-  board       Board  @relation(fields: [boardId], references: [id])
+  board       Board  @relation(fields: [boardId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   boardId     String
   wip         Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Card      Card[]
+
+  Card Card[]
 
   @@map("column")
 }
@@ -65,9 +79,9 @@ model Card {
   id          String @id @default(cuid())
   name        String
   description String
-  column      Column @relation(fields: [columnId], references: [id])
   columnId    String
 
+  column    Column   @relation(fields: [columnId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

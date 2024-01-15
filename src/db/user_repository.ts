@@ -5,7 +5,6 @@ const select: Record<keyof Omit<V.User, "password">, boolean> = {
   id: true,
   email: true,
   name: true,
-  role: true,
 };
 
 export const create: V.CreateDb = async (data) =>
@@ -19,6 +18,9 @@ export const findMany: V.FindManyDb = async (where) =>
 
 export const getOne: V.GetOneDb = async (where) =>
   prisma.user.findUniqueOrThrow({ where, select });
+
+export const deleteOne: V.DeleteOneDb = async (where) =>
+  prisma.user.delete({ where, select });
 
 export const login: V.LoginDb = async (data) =>
   prisma.user.findUniqueOrThrow({ where: { email: data.email } });

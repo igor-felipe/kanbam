@@ -16,8 +16,11 @@ export default function errorHandler(
 ): ExResponse | void | express.NextFunction {
   //
   if (err instanceof z.ZodError) {
-    res.status(422).json({
-      message: fromZodError(err, { prefix: null }),
+    return res.status(422).json({
+      message: fromZodError(err, { prefix: null }).message.replace(
+        /[\\'"]/g,
+        "",
+      ),
     });
   }
 
@@ -29,7 +32,7 @@ export default function errorHandler(
           ? 409
           : 500;
     return res.status(code).json({
-      message: err.message,
+      message: err.message.split("\n")[8],
     });
   }
 
@@ -42,18 +45,6 @@ export default function errorHandler(
   if (err instanceof Prisma.PrismaClientValidationError) {
     return res.status(422).json({
       message: err.message,
-    });
-  }
-
-  if (err instanceof DefaultError) {
-    return res.status(err.code).json({
-      message: err.details,
-    });
-  }
-
-  if (err instanceof DefaultError) {
-    return res.status(err.code).json({
-      message: err.details,
     });
   }
 

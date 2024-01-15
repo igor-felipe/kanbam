@@ -6,6 +6,15 @@ import { router } from "./routes/routes";
 import errorHandler from "./exceptions/errorHandler";
 
 import { configuration } from "./config/jwt-configuration";
+import { Auth } from "./validators/user_validator";
+
+declare global {
+  namespace Express {
+    interface Request {
+      auth: Auth;
+    }
+  }
+}
 
 const app = express();
 
