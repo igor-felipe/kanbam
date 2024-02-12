@@ -53,9 +53,10 @@ model Board {
   updatedAt DateTime @updatedAt
 
   Column      Column[]
-  workspace   workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  workspaceId String?
+  workspace   workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  workspaceId String
 
+  @@unique([name, workspaceId])
   @@map("board")
 }
 

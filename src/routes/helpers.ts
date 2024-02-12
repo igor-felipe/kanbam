@@ -5,6 +5,7 @@ import { app } from "../app";
 import * as user from "../validators/user_validator";
 import * as workspace from "../validators/workspace_validator";
 import * as member from "../validators/member_validator";
+import * as board from "../validators/board_validator";
 
 export const request = supertest(app);
 
@@ -36,6 +37,15 @@ export const createWorkspaceRequest = (
       throw new Error(`create workspace error: ${e.response}`);
     });
 
+export const createBoardRequest = (input: board.CreateDbInput, token: string) =>
+  request
+    .post("/api/board")
+    .send(input)
+    .set("Authorization", `Bearer ${token}`)
+    .catch((e) => {
+      throw new Error(`create board error: ${e.response}`);
+    });
+
 export const createMemberRequest = (
   input: member.CreateDbInput,
   token: string,
@@ -57,4 +67,10 @@ export const fakeUser = () => ({
 export const fakeWorkspace = (userId: string): workspace.CreateInput => ({
   name: faker.string.nanoid(8),
   userId,
+});
+
+export const fakeBoard = (workspaceId: string): board.CreateInput => ({
+  name: faker.string.nanoid(8),
+  description: "",
+  workspaceId,
 });
