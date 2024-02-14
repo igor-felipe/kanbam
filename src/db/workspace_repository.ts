@@ -7,10 +7,7 @@ const select: Record<keyof V.Workspace, boolean> = {
   userId: true,
 };
 
-export const create: V.CreateDb = async ({
-  userId,
-  ...data
-}: V.CreateDbInput) =>
+export const create: V.CreateDb = async ({ userId, ...data }) =>
   prisma.workspace.create({
     data: {
       ...data,

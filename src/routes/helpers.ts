@@ -6,6 +6,7 @@ import * as user from "../validators/user_validator";
 import * as workspace from "../validators/workspace_validator";
 import * as member from "../validators/member_validator";
 import * as board from "../validators/board_validator";
+import * as column from "../validators/column_validator";
 
 export const request = supertest(app);
 
@@ -14,7 +15,7 @@ export const createUserRequest = (input: user.CreateInput) =>
     .post("/api/user/register")
     .send(input)
     .catch((e) => {
-      throw new Error(`create user error: ${e.response}`);
+      throw new Error(`create user request error: ${e.response}`);
     });
 
 export const loginRequest = (input: user.LoginInput) =>
@@ -22,7 +23,7 @@ export const loginRequest = (input: user.LoginInput) =>
     .post("/api/user/login")
     .send(input)
     .catch((e) => {
-      throw new Error(`login user error: ${e.response}`);
+      throw new Error(`login user request error: ${e.response}`);
     });
 
 export const createWorkspaceRequest = (
@@ -34,28 +35,34 @@ export const createWorkspaceRequest = (
     .send(input)
     .set("Authorization", `Bearer ${token}`)
     .catch((e) => {
-      throw new Error(`create workspace error: ${e.response}`);
+      throw new Error(`create workspace request error: ${e.response}`);
     });
 
-export const createBoardRequest = (input: board.CreateDbInput, token: string) =>
+export const createBoardRequest = (input: board.CreateInput, token: string) =>
   request
     .post("/api/board")
     .send(input)
     .set("Authorization", `Bearer ${token}`)
     .catch((e) => {
-      throw new Error(`create board error: ${e.response}`);
+      throw new Error(`create board request error: ${e.response}`);
     });
 
-export const createMemberRequest = (
-  input: member.CreateDbInput,
-  token: string,
-) =>
+export const createColumnRequest = (input: column.CreateInput, token: string) =>
+  request
+    .post("/api/column")
+    .send(input)
+    .set("Authorization", `Bearer ${token}`)
+    .catch((e) => {
+      throw new Error(`create column request error: ${e.response}`);
+    });
+
+export const createMemberRequest = (input: member.CreateInput, token: string) =>
   request
     .post("/api/member")
     .send(input)
     .set("Authorization", `Bearer ${token}`)
     .catch((e) => {
-      throw new Error(`create member error: ${e.response}`);
+      throw new Error(`create member request error: ${e.response}`);
     });
 
 export const fakeUser = () => ({
@@ -73,4 +80,13 @@ export const fakeBoard = (workspaceId: string): board.CreateInput => ({
   name: faker.string.nanoid(8),
   description: "",
   workspaceId,
+});
+
+export const fakeColumn = (
+  input: Partial<column.CreateInput>,
+): column.CreateInput => ({
+  name: faker.string.nanoid(8),
+  description: input.description ?? "",
+  boardId: input.boardId ?? "",
+  wip: input.wip ?? 1,
 });
