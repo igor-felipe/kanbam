@@ -32,7 +32,7 @@ export default function errorHandler(
           ? 409
           : 500;
     return res.status(code).json({
-      message: err.message.split("\n")[8],
+      message: `${err}`,
     });
   }
 

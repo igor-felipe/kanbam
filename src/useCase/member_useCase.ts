@@ -28,7 +28,7 @@ export const update: V.Update = async ({ auth, ...input }) => {
       role: "admin",
     });
     if (members.length === 1)
-      throw new Error("Cannot remove last admin from member");
+      throw new Error("Cannot remove last admin from workspace");
   }
 
   return DB.update(input);
@@ -58,7 +58,7 @@ export const deleteOne: V.DeleteOne = async ({ auth, ...input }) => {
       role: "admin",
     });
     if (members.length === 1)
-      throw new Error("Cannot remove last admin from member");
+      throw new Error("Cannot remove last admin from workspace");
   }
 
   return DB.deleteOne(input);

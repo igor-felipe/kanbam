@@ -1,34 +1,76 @@
 import { z } from "zod";
 import { validatorAdapter } from "./helpers";
+import { member } from "./member_validator";
+import { label } from "./board_validator";
 
-export const label = z.object({
-  id: z.number().int().positive(),
-  name: z.string().min(1).trim(),
-  color: z.string(),
+const activity = z.object({
+  id: z.string(),
+  userId: z.string(),
+  action: z.string(),
+  date: z.date(),
 });
 
-export const board = z.object({
-  id: z.string().min(3).trim(),
-  name: z.string().min(3).trim(),
-  description: z.string(),
-  workspaceId: z.string(),
-  labels: z.array(label),
-  createdAt: z.date(),
+const comment = z.object({
+  userId: z.string(),
+  content: z.string(),
   updatedAt: z.date(),
 });
 
-export type Board = z.infer<typeof board>;
+const priority = z.enum(["low", "medium", "high"]);
 
-export const createInput = board
+export const card = z.object({
+  id: z.number().int().positive(),
+  title: z.string().min(1).trim(),
+  description: z.string().trim().nullish(),
+  priority: priority.nullish(),
+  cover: z.string().nullish(),
+  archived: z.boolean(),
+  dueDate: z.date().nullish(),
+  updatedAt: z.date(),
+  createdAt: z.date(),
+  columnId: z.string().min(1).trim(),
+  members: z.array(member.omit({ role: true })),
+  comments: z.array(comment),
+  labels: z.array(label),
+  activity: z.array(activity),
+});
+
+export type Card = z.infer<typeof card>;
+export type Activity = z.infer<typeof activity>;
+export type Comment = z.infer<typeof comment>;
+export type Label = z.infer<typeof label>;
+export type Priority = z.infer<typeof priority>;
+
+export const createInput = card
+  .omit({
+    id: true,
+    archived: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({ activity: activity.pick({ action: true }) })
+  .extend({ labels: z.number().int().positive().array() })
+  .extend({
+    comments: z.array(
+      comment.omit({ id: true, updatedAt: true, createdAt: true }),
+    ),
+  })
+  .extend({ activity: activity.omit({ id: true, date: true }) })
+  .extend({ userId: z.string() });
+
+export const createDbInput = card
   .omit({
     id: true,
     createdAt: true,
     updatedAt: true,
   })
-  .extend({ labels: z.array(label.omit({ id: true })) });
-export const createDbInput = createInput;
-export const createDbOutput = board;
-export const createOutput = createDbOutput;
+  .extend({ labels: z.number().int().positive().array() })
+  .extend({ activity: activity.omit({ id: true }) })
+  .extend({
+    comments: z.array(comment.omit({ id: true, updatedAt: true })),
+  });
+export const createDbOutput = card;
+export const createOutput = card;
 
 export type CreateInput = z.infer<typeof createInput>;
 export type CreateOutput = z.infer<typeof createOutput>;
@@ -38,30 +80,34 @@ export type CreateDbOutput = z.infer<typeof createDbOutput>;
 export type CreateDb = (input: CreateDbInput) => Promise<CreateDbOutput>;
 export const createValidator = validatorAdapter(createInput);
 // ------------------------------------
-export const updateInput = board
-  .extend({ labels: label.array() })
+export const updateDbInput = card
   .omit({
     createdAt: true,
     updatedAt: true,
   })
+  .extend({ activity: activity.omit({ id: true }) })
   .partial()
   .required({ id: true });
-export const updateDbInput = updateInput;
-export const updateOutput = board;
-export const updateDbOutput = board;
+
+export const updateInput = updateDbInput
+  .extend({ userId: z.string() })
+  .extend({ activity: activity.pick({ action: true }) });
+
+export const updateOutput = card;
+export const updateDbOutput = card;
 
 export type UpdateInput = z.infer<typeof updateInput>;
-export type UpdateOutput = z.infer<typeof updateOutput>;
-export type Update = (input: UpdateInput) => Promise<UpdateOutput>;
 export type UpdateDbInput = z.infer<typeof updateDbInput>;
 export type UpdateDbOutput = z.infer<typeof updateDbOutput>;
+export type UpdateOutput = z.infer<typeof updateOutput>;
 export type UpdateDb = (input: UpdateDbInput) => Promise<UpdateDbOutput>;
+export type Update = (input: UpdateInput) => Promise<UpdateOutput>;
 export const updateValidator = validatorAdapter(updateInput);
 // ------------------------------------
-export const getOneInput = board.pick({ id: true });
+export const getOneInput = card.pick({ id: true });
 export const getOneDbInput = getOneInput;
-export const getOneDbOutput = board;
-export const getOneOutput = board;
+export const getOneDbOutput = card;
+export const getOneOutput = card;
 
 export type GetOneInput = z.infer<typeof getOneInput>;
 export type GetOneOutput = z.infer<typeof getOneOutput>;
@@ -71,13 +117,13 @@ export type GetOneDbOutput = z.infer<typeof getOneDbOutput>;
 export type GetOneDb = (input: GetOneDbInput) => Promise<GetOneDbOutput>;
 export const getOneValidator = validatorAdapter(getOneInput);
 // ------------------------------------
-export const findManyInput = board
-  .omit({ labels: true })
-  .extend({ label })
+export const findManyInput = card
+  .omit({ labels: true, members: true, activity: true, comments: true })
+  .extend({ label, member, activity, comment })
   .partial();
 export const findManyDbInput = findManyInput;
-export const findManyDbOutput = board.array();
-export const findManyOutput = board.array();
+export const findManyDbOutput = card.array();
+export const findManyOutput = card.array();
 
 export type FindManyInput = z.infer<typeof findManyInput>;
 export type FindManyOutput = z.infer<typeof findManyDbOutput>;
@@ -87,10 +133,10 @@ export type FindManyDbOutput = z.infer<typeof findManyDbOutput>;
 export type FindManyDb = (input: FindManyDbInput) => Promise<FindManyDbOutput>;
 export const findManyValidator = validatorAdapter(findManyInput);
 // ------------------------------------
-export const deleteOneInput = board.pick({ id: true, workspace: true });
+export const deleteOneInput = card.pick({ id: true, workspace: true });
 export const deleteOneDbInput = deleteOneInput;
-export const deleteOneDbOutput = board;
-export const deleteOneOutput = board;
+export const deleteOneDbOutput = card;
+export const deleteOneOutput = card;
 
 export type DeleteOneInput = z.infer<typeof deleteOneInput>;
 export type DeleteOneOutput = z.infer<typeof deleteOneOutput>;

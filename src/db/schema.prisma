@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -39,15 +39,29 @@ model Member {
 
   User      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   workspace workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  cardId    Int?
+  Card      Card?     @relation(fields: [cardId], references: [id])
 
   @@id([workspaceId, userId])
   @@map("post")
 }
 
+model Label {
+  id      Int     @id @default(autoincrement())
+  name    String
+  color   String
+  Board   Board?  @relation(fields: [boardId], references: [id])
+  boardId String?
+  Card    Card[]
+
+  @@map("label")
+}
+
 model Board {
-  id          String @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
   description String
+  labels      Label[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -77,16 +91,30 @@ model Column {
   @@map("column")
 }
 
-model Card {
-  id          String @id @default(cuid())
-  name        String
-  description String
-  columnId    String
+enum Priority {
+  low
+  medium
+  high
+}
 
+model Card {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  priority    Priority?
+  cover       String?
+  archived    Boolean
+  dueDate     DateTime?
+  columnId    String
+  labels      Label[]
+  comments    Json[]
+  activity    Json[]
+
+  member    Member[]
   column    Column   @relation(fields: [columnId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([name, columnId])
+  @@unique([title, columnId])
   @@map("card")
 }

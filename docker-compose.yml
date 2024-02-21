@@ -1,0 +1,12 @@
+version: '3.1'
+
+services:
+  db-postgres:
+    image: postgres:alpine
+    ports:
+      - "5436:5432"
+    container_name: db-agile
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+      POSTGRES_USER: example

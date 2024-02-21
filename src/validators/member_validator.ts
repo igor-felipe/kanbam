@@ -5,11 +5,13 @@ import { auth } from "./user_validator";
 export const role = z.enum(["admin", "user"]);
 export type Role = z.infer<typeof role>;
 
-const member = z.object({
+export const member = z.object({
   workspaceId: z.string(),
   role,
   userId: z.string(),
 });
+
+export type Member = z.infer<typeof member>;
 
 export const createInput = member;
 export const createDbInput = createInput;

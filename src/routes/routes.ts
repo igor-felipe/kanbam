@@ -5,6 +5,7 @@ import { workspaceRoutes } from "./workspace_routes";
 import { memberRoutes } from "./member_routes";
 import { boardRoutes } from "./board_routes";
 import { columnRoutes } from "./columns_routes";
+import { cardRoutes } from "./card_routes";
 
 const router = Router();
 
@@ -15,6 +16,7 @@ router.use(
   memberRoutes,
   boardRoutes,
   columnRoutes,
+  cardRoutes,
 );
 
 export { router };

@@ -33,7 +33,21 @@ describe("column_repository", () => {
       .$transaction([
         prisma.user.create({ data: userInput }),
         prisma.workspace.create({ data: workspaceInput }),
-        prisma.board.create({ data: boardInput }),
+        prisma.board.create({
+          data: {
+            ...boardInput,
+            labels: { createMany: { data: boardInput.labels ?? [] } },
+          },
+          select: {
+            description: true,
+            workspaceId: true,
+            name: true,
+            labels: { select: { id: true, name: true, color: true } },
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        }),
       ])
       .catch((e) => {
         throw e;

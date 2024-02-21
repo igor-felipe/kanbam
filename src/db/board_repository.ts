@@ -8,6 +8,9 @@ const select: Record<keyof V.Board, boolean> = {
   description: true,
   createdAt: true,
   updatedAt: true,
+  labels: {
+    select: { id: true, name: true, color: true },
+  } as unknown as boolean,
 };
 
 export const create: V.CreateDb = async ({ workspaceId, ...data }) =>
@@ -15,23 +18,41 @@ export const create: V.CreateDb = async ({ workspaceId, ...data }) =>
     data: {
       ...data,
       workspace: { connect: { id: workspaceId } },
+      labels: { createMany: { data: data.labels ?? [], skipDuplicates: true } },
     },
+    select,
   });
 
-export const update: V.UpdateDb = async ({ id, workspaceId, ...data }) =>
-  prisma.board.update({
+export const update: V.UpdateDb = async ({
+  id,
+  workspaceId,
+  labels,
+  ...data
+}) => {
+  return prisma.board.update({
     where: { id },
     data: {
       ...data,
-      workspace: { connect: { id: workspaceId } },
+      workspace: workspaceId ? { connect: { id: workspaceId } } : undefined,
+      labels: labels
+        ? {
+            deleteMany: { boardId: id },
+            createMany: { data: labels ?? [], skipDuplicates: true },
+          }
+        : undefined,
     },
+    select,
   });
+};
 
-export const findMany: V.FindManyDb = async (where) =>
-  prisma.board.findMany({ where, select });
+export const findMany: V.FindManyDb = async ({ label, ...where }) =>
+  prisma.board.findMany({
+    where: { ...where, labels: { some: label } },
+    select,
+  });
 
 export const getOne: V.GetOneDb = async (where) =>
   prisma.board.findUniqueOrThrow({ where, select });
 
 export const deleteOne: V.DeleteOneDb = async (where) =>
-  prisma.board.delete({ where });
+  prisma.board.delete({ where, select });

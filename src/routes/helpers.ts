@@ -7,6 +7,7 @@ import * as workspace from "../validators/workspace_validator";
 import * as member from "../validators/member_validator";
 import * as board from "../validators/board_validator";
 import * as column from "../validators/column_validator";
+import * as card from "../validators/card_validator";
 
 export const request = supertest(app);
 
@@ -65,6 +66,15 @@ export const createMemberRequest = (input: member.CreateInput, token: string) =>
       throw new Error(`create member request error: ${e.response}`);
     });
 
+export const createCardRequest = (input: any, token: string) =>
+  request
+    .post("/api/card")
+    .send(input)
+    .set("Authorization", `Bearer ${token}`)
+    .catch((e) => {
+      throw new Error(`create card request error: ${e.response}`);
+    });
+
 export const fakeUser = () => ({
   password: faker.string.nanoid(8),
   email: faker.internet.email().toLocaleLowerCase(),
@@ -80,6 +90,10 @@ export const fakeBoard = (workspaceId: string): board.CreateInput => ({
   name: faker.string.nanoid(8),
   description: "",
   workspaceId,
+  labels: [0, 1, 2].map(() => ({
+    color: faker.color.rgb(),
+    name: faker.word.verb(),
+  })),
 });
 
 export const fakeColumn = (
@@ -89,4 +103,24 @@ export const fakeColumn = (
   description: input.description ?? "",
   boardId: input.boardId ?? "",
   wip: input.wip ?? 1,
+});
+
+export const fakeCard = (
+  input: Partial<card.CreateInput>,
+): card.CreateInput => ({
+  ...input,
+  cover: input.cover ?? null,
+  dueDate: input.dueDate ?? null,
+  priority: input.priority ?? null,
+  userId: input.userId ?? "",
+  labels: input.labels ?? [],
+  members: input.members ?? [],
+  columnId: input.columnId ?? "",
+  description: input.description ?? "",
+  title: input.title ?? faker.word.words(),
+  comments: input.comments ?? [],
+  activity: {
+    userId: input.userId ?? "",
+    action: "",
+  },
 });

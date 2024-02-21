@@ -39,6 +39,10 @@ describe("Board Routes", () => {
       status: 201,
       body: {
         ...boardInput,
+        labels: boardInput.labels.map((label) => ({
+          ...label,
+          id: expect.any(Number),
+        })),
         id: expect.any(String),
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
