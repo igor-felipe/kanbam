@@ -21,8 +21,8 @@ export const update: V.UpdateDb = async ({ id, boardId, ...data }) =>
     },
   });
 
-export const findMany: V.FindManyDb = async (where) =>
-  prisma.column.findMany({ where });
+export const findMany: V.FindManyDb = async ({ boardId, ...where }) =>
+  prisma.column.findMany({ where: { ...where, board: { id: boardId } } });
 
 export const getOne: V.GetOneDb = async (where) =>
   prisma.column.findUniqueOrThrow({ where });

@@ -21,7 +21,7 @@ npm install -g yarn nodemon ts-node
 yarn
 ```
 
-O banco de dados utilizado é o SQLite, fornecido pelo ORM Prisma.
+O banco de dados utilizado é o Postgres
 
 - Inicializar o ORM Prisma. Esse comando deve ser usado sempre que o esquema Prisma mudar e quando inicializar o projeto pela primeira vez.
 

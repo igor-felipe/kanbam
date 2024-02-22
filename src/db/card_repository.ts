@@ -2,7 +2,7 @@ import { prisma } from "./prisma";
 import * as V from "../validators/card_validator";
 
 const select = {
-  member: { select: { userId: true, workspaceId: true } },
+  member: { select: { userId: true } },
   activity: true,
   archived: true,
   cover: true,
@@ -37,17 +37,17 @@ export const create: V.CreateDb = async ({
     },
   });
 
-  const connectMembers = members.map((member) =>
+  const connectMembers = members?.map((member) =>
     prisma.member.update({
       where: { workspaceId_userId: member },
       data: {
         Card: { connect: { id: card.id } },
       },
-      select: { userId: true, workspaceId: true },
+      select: { userId: true },
     }),
   );
 
-  const connectLabels = labels.map((label) =>
+  const connectLabels = labels?.map((label) =>
     prisma.label.update({
       where: { id: label },
       data: {
@@ -57,14 +57,14 @@ export const create: V.CreateDb = async ({
     }),
   );
 
-  const membersArray = await Promise.all(connectMembers);
-  const labelsArray = await Promise.all(connectLabels);
+  const membersArray = await Promise.all(connectMembers ?? []);
+  const labelsArray = await Promise.all(connectLabels ?? []);
 
   return {
     ...card,
     members: membersArray,
     labels: labelsArray,
-    activity: activity as any,
+    activity: [activity] as any,
     comments: comments as any,
   };
 };
@@ -80,17 +80,20 @@ export const update: V.UpdateDb = async ({
 }) => {
   const previousData = await prisma.card.findFirst({
     where: { id },
-    select: { activity: true, comments: true },
+    select: {
+      activity: true,
+      comments: true,
+      labels: { select: { id: true, name: true, color: true } },
+      member: { select: { userId: true } },
+    },
   });
 
   const card = await prisma.card.update({
     where: { id },
     data: {
       ...data,
-      column: { connect: { id: columnId } },
-      activity: activity
-        ? { set: [...((previousData?.activity ?? []) as any), activity] }
-        : undefined,
+      column: columnId ? { connect: { id: columnId } } : undefined,
+      activity: activity ? { push: activity } : undefined,
       comments: comments
         ? { set: [...((previousData?.comments ?? []) as any), ...comments] }
         : undefined,
@@ -104,7 +107,7 @@ export const update: V.UpdateDb = async ({
           data: {
             Card: { connect: { id: card.id } },
           },
-          select: { userId: true, workspaceId: true },
+          select: { userId: true },
         }),
       )
     : [];
@@ -126,10 +129,10 @@ export const update: V.UpdateDb = async ({
 
   return {
     ...card,
-    members: membersArray,
-    labels: labelsArray,
-    activity: activity as any,
-    comments: comments as any,
+    members: membersArray.length > 0 ? membersArray : previousData?.member,
+    labels: labelsArray.length > 0 ? labelsArray : previousData?.labels,
+    activity: card.activity as any,
+    comments: comments || (previousData?.comments as any),
   };
 };
 

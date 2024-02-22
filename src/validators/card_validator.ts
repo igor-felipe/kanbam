@@ -4,7 +4,6 @@ import { member } from "./member_validator";
 import { label } from "./board_validator";
 
 const activity = z.object({
-  id: z.string(),
   userId: z.string(),
   action: z.string(),
   date: z.date(),
@@ -13,6 +12,7 @@ const activity = z.object({
 const comment = z.object({
   userId: z.string(),
   content: z.string(),
+  createdAt: z.date(),
   updatedAt: z.date(),
 });
 
@@ -29,9 +29,9 @@ export const card = z.object({
   updatedAt: z.date(),
   createdAt: z.date(),
   columnId: z.string().min(1).trim(),
-  members: z.array(member.omit({ role: true })),
-  comments: z.array(comment),
-  labels: z.array(label),
+  members: z.array(member.pick({ userId: true })).optional(),
+  comments: z.array(comment).optional(),
+  labels: z.array(label).optional(),
   activity: z.array(activity),
 });
 
@@ -49,13 +49,15 @@ export const createInput = card
     updatedAt: true,
   })
   .extend({ activity: activity.pick({ action: true }) })
-  .extend({ labels: z.number().int().positive().array() })
+  .extend({ labels: z.number().int().positive().array().optional() })
   .extend({
-    comments: z.array(
-      comment.omit({ id: true, updatedAt: true, createdAt: true }),
-    ),
+    comments: z.array(comment.pick({ content: true })),
   })
-  .extend({ activity: activity.omit({ id: true, date: true }) })
+  .extend({
+    members: z
+      .array(member.pick({ userId: true, workspaceId: true }))
+      .optional(),
+  })
   .extend({ userId: z.string() });
 
 export const createDbInput = card
@@ -64,11 +66,17 @@ export const createDbInput = card
     createdAt: true,
     updatedAt: true,
   })
-  .extend({ labels: z.number().int().positive().array() })
-  .extend({ activity: activity.omit({ id: true }) })
+  .extend({ labels: z.number().int().positive().array().optional() })
+  .extend({ activity })
   .extend({
-    comments: z.array(comment.omit({ id: true, updatedAt: true })),
+    comments: z.array(comment),
+  })
+  .extend({
+    members: z
+      .array(member.pick({ userId: true, workspaceId: true }))
+      .optional(),
   });
+
 export const createDbOutput = card;
 export const createOutput = card;
 
@@ -85,7 +93,12 @@ export const updateDbInput = card
     createdAt: true,
     updatedAt: true,
   })
-  .extend({ activity: activity.omit({ id: true }) })
+  .extend({ activity })
+  .extend({
+    members: z
+      .array(member.pick({ userId: true, workspaceId: true }))
+      .optional(),
+  })
   .partial()
   .required({ id: true });
 

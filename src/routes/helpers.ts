@@ -118,9 +118,11 @@ export const fakeCard = (
   columnId: input.columnId ?? "",
   description: input.description ?? "",
   title: input.title ?? faker.word.words(),
-  comments: input.comments ?? [],
+  comments: input.comments ?? [
+    { content: faker.word.words() },
+    { content: faker.word.words() },
+  ],
   activity: {
-    userId: input.userId ?? "",
     action: "",
   },
 });

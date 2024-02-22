@@ -10,6 +10,12 @@ export const create: V.Create = ({ userId, ...data }) => {
       userId,
       action: data.activity.action,
     },
+    comments: data?.comments?.map((comment) => ({
+      ...comment,
+      updatedAt: new Date(),
+      createdAt: new Date(),
+      userId,
+    })),
   });
 
   return card;
@@ -24,6 +30,11 @@ export const update: V.Update = ({ userId, ...data }) => {
       userId,
       action: data.activity.action,
     },
+    comments: data?.comments?.map((comment) => ({
+      ...comment,
+      updatedAt: new Date(),
+      userId,
+    })),
   });
 
   return card;

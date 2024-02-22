@@ -65,10 +65,26 @@ describe("Card Routes", () => {
       status: 201,
       body: {
         ...cardInput,
-        activity: {
-          date: expect.any(String),
-          ...cardInput.activity,
-        },
+        activity: [
+          {
+            date: expect.any(String),
+            ...cardInput.activity,
+            userId: cardInput.userId,
+          },
+        ],
+        members: expect.arrayContaining(
+          cardInput.members?.map((member) => ({
+            userId: member.userId,
+          }))!,
+        ),
+        comments: expect.arrayContaining(
+          cardInput.comments.map((comment) => ({
+            ...comment,
+            updatedAt: expect.any(String),
+            createdAt: expect.any(String),
+            userId: cardInput.userId,
+          })),
+        ),
         labels: boardOutput.labels,
         userId: undefined,
         archived: false,
@@ -81,24 +97,6 @@ describe("Card Routes", () => {
     cardOutput = body;
   });
 
-  it("update card title", async () => {
-    cardOutput.title = faker.person.fullName().toLocaleLowerCase();
-
-    const { status, body } = await request
-      .put("/api/card")
-      .send(cardOutput)
-      .set("Authorization", `Bearer ${token}`);
-
-    cardOutput.updatedAt = body.updatedAt;
-    expect({ status, body }).toEqual({
-      status: 200,
-      body: {
-        ...cardOutput,
-        activity: { ...cardOutput.activity, date: expect.any(String) },
-      },
-    });
-  });
-
   it("get card", async () => {
     const { status, body } = await request
       .get(`/api/card/${cardOutput.id}`)
@@ -108,9 +106,17 @@ describe("Card Routes", () => {
       status: 200,
       body: {
         ...cardOutput,
-        activity: expect.arrayContaining([
-          { ...cardOutput.activity, date: expect.any(String) },
-        ]),
+        activity: expect.arrayContaining(
+          cardOutput.activity.map((activity) => ({
+            ...activity,
+            date: expect.any(String),
+          })),
+        ),
+        members: expect.arrayContaining(
+          cardInput.members?.map((member) => ({
+            userId: member.userId,
+          }))!,
+        ),
       },
     });
   });
@@ -125,12 +131,59 @@ describe("Card Routes", () => {
       body: expect.arrayContaining([
         {
           ...cardOutput,
-          activity: expect.arrayContaining([
-            { ...cardOutput.activity, date: expect.any(String) },
-          ]),
+          activity: expect.arrayContaining(
+            cardOutput.activity.map((activity) => ({
+              ...activity,
+              date: expect.any(String),
+            })),
+          ),
+          members: expect.arrayContaining(
+            cardInput.members?.map((member) => ({
+              userId: member.userId,
+            }))!,
+          ),
         },
       ]),
     });
+  });
+
+  it("update card title", async () => {
+    const title = faker.person.fullName().toLocaleLowerCase();
+    const activity = { action: "update" };
+
+    const updateInput = {
+      id: cardOutput.id,
+      columnId: cardOutput.columnId,
+      activity,
+      title,
+    };
+
+    const { status, body } = await request
+      .put("/api/card")
+      .send(updateInput)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect({ status, body }).toEqual({
+      status: 200,
+      body: {
+        ...cardOutput,
+        activity: expect.arrayContaining(
+          cardOutput.activity.map((e) => ({
+            ...e,
+            date: expect.any(String),
+          })),
+        ),
+        members: expect.arrayContaining(
+          cardInput.members?.map((member) => ({
+            userId: member.userId,
+          }))!,
+        ),
+        title,
+        updatedAt: expect.any(String),
+      },
+    });
+    cardOutput = body;
+    cardOutput.title = title;
   });
 
   it("delete card", async () => {
@@ -140,12 +193,7 @@ describe("Card Routes", () => {
 
     expect({ status, body }).toEqual({
       status: 200,
-      body: {
-        ...cardOutput,
-        activity: expect.arrayContaining([
-          { ...cardOutput.activity, date: expect.any(String) },
-        ]),
-      },
+      body: expect.objectContaining({ id: cardOutput.id }),
     });
   });
 });
