@@ -9,6 +9,7 @@ export const column = z.object({
   boardId: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
+  cardOrder: z.number().int().positive().array().optional(),
 });
 export type Column = z.infer<typeof column>;
 

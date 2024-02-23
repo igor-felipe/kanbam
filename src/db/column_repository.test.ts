@@ -46,6 +46,7 @@ describe("column_repository", () => {
             id: true,
             createdAt: true,
             updatedAt: true,
+            columnOrder: true,
           },
         }),
       ])
@@ -69,6 +70,7 @@ describe("column_repository", () => {
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
       id: expect.any(String),
+      cardOrder: expect.any(Array),
     });
   });
 

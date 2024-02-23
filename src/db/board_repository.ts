@@ -8,17 +8,23 @@ const select: Record<keyof V.Board, boolean> = {
   description: true,
   createdAt: true,
   updatedAt: true,
+  columnOrder: true,
   labels: {
     select: { id: true, name: true, color: true },
   } as unknown as boolean,
 };
 
-export const create: V.CreateDb = async ({ workspaceId, ...data }) =>
+export const create: V.CreateDb = async ({
+  workspaceId,
+  columnOrder,
+  ...data
+}) =>
   prisma.board.create({
     data: {
       ...data,
       workspace: { connect: { id: workspaceId } },
       labels: { createMany: { data: data.labels ?? [], skipDuplicates: true } },
+      columnOrder: columnOrder ? { set: columnOrder } : undefined,
     },
     select,
   });
@@ -27,6 +33,7 @@ export const update: V.UpdateDb = async ({
   id,
   workspaceId,
   labels,
+  columnOrder,
   ...data
 }) => {
   return prisma.board.update({
@@ -40,14 +47,22 @@ export const update: V.UpdateDb = async ({
             createMany: { data: labels ?? [], skipDuplicates: true },
           }
         : undefined,
+      columnOrder: columnOrder ? { set: columnOrder } : undefined,
     },
     select,
   });
 };
 
-export const findMany: V.FindManyDb = async ({ label, ...where }) =>
+export const findMany: V.FindManyDb = async ({
+  label,
+  columnOrder,
+  ...where
+}) =>
   prisma.board.findMany({
-    where: { ...where, labels: { some: label } },
+    where: {
+      ...where,
+      labels: { some: label },
+    },
     select,
   });
 

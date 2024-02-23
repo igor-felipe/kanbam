@@ -15,6 +15,7 @@ export const board = z.object({
   labels: z.array(label),
   createdAt: z.date(),
   updatedAt: z.date(),
+  columnOrder: z.string().array().optional(),
 });
 
 export type Board = z.infer<typeof board>;

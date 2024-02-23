@@ -52,6 +52,7 @@ describe("column routes", () => {
         id: expect.any(String),
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
+        cardOrder: [],
       },
     });
 

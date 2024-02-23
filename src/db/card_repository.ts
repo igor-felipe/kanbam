@@ -60,6 +60,13 @@ export const create: V.CreateDb = async ({
   const membersArray = await Promise.all(connectMembers ?? []);
   const labelsArray = await Promise.all(connectLabels ?? []);
 
+  await prisma.column.update({
+    where: { id: card.columnId },
+    data: {
+      cardOrder: { push: card.id },
+    },
+  });
+
   return {
     ...card,
     members: membersArray,
@@ -189,6 +196,18 @@ export const deleteOne: V.DeleteOne = async (where) => {
       where,
       select,
     });
+
+  const column = await prisma.column.findUnique({
+    where: { id: card.columnId },
+    select: { cardOrder: true },
+  });
+
+  await prisma.column.update({
+    where: { id: card.columnId },
+    data: {
+      cardOrder: { set: column?.cardOrder.filter((id) => id !== card.id) },
+    },
+  });
 
   return {
     ...card,
