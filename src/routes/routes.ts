@@ -6,6 +6,7 @@ import { memberRoutes } from "./member_routes";
 import { boardRoutes } from "./board_routes";
 import { columnRoutes } from "./columns_routes";
 import { cardRoutes } from "./card_routes";
+import { devRoutes } from "./dev_routes";
 
 const router = Router();
 
@@ -17,6 +18,7 @@ router.use(
   boardRoutes,
   columnRoutes,
   cardRoutes,
+  devRoutes,
 );
 
 export { router };
