@@ -6,7 +6,7 @@ export const create: V.Create = ({ userId, ...data }) => {
     ...data,
     archived: false,
     activity: {
-      date: new Date(),
+      date: data.activity.date ?? new Date(),
       userId,
       action: data.activity.action,
     },

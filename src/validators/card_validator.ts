@@ -3,10 +3,15 @@ import { validatorAdapter } from "./helpers";
 import { member } from "./member_validator";
 import { label } from "./board_validator";
 
+const dataValidator = z
+  .date()
+  .or(z.string())
+  .refine((v) => new Date(v));
+
 const activity = z.object({
   userId: z.string(),
   action: z.string(),
-  date: z.date(),
+  date: dataValidator,
 });
 
 const comment = z.object({
@@ -26,8 +31,8 @@ export const card = z.object({
   cover: z.string().nullish(),
   archived: z.boolean(),
   dueDate: z.date().nullish(),
-  updatedAt: z.date(),
-  createdAt: z.date(),
+  updatedAt: dataValidator,
+  createdAt: dataValidator,
   columnId: z.string().min(1).trim(),
   members: z.array(member.pick({ userId: true })).optional(),
   comments: z.array(comment).optional(),
@@ -45,10 +50,14 @@ export const createInput = card
   .omit({
     id: true,
     archived: true,
+  })
+  .partial({
     createdAt: true,
     updatedAt: true,
   })
-  .extend({ activity: activity.pick({ action: true }) })
+  .extend({
+    activity: activity.partial().required({ action: true }),
+  })
   .extend({ labels: z.number().int().positive().array().optional() })
   .extend({
     comments: z.array(comment.pick({ content: true })),
@@ -63,11 +72,15 @@ export const createInput = card
 export const createDbInput = card
   .omit({
     id: true,
+  })
+  .partial({
     createdAt: true,
     updatedAt: true,
   })
   .extend({ labels: z.number().int().positive().array().optional() })
-  .extend({ activity })
+  .extend({
+    activity,
+  })
   .extend({
     comments: z.array(comment),
   })
@@ -102,9 +115,11 @@ export const updateDbInput = card
   .partial()
   .required({ id: true });
 
-export const updateInput = updateDbInput
-  .extend({ userId: z.string() })
-  .extend({ activity: activity.pick({ action: true }) });
+export const updateInput = updateDbInput.extend({ userId: z.string() }).extend({
+  activity: activity
+    .required({ action: true })
+    .partial({ date: true, userId: true }),
+});
 
 export const updateOutput = card;
 export const updateDbOutput = card;

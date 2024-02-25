@@ -195,5 +195,9 @@ describe("Card Routes", () => {
       status: 200,
       body: expect.objectContaining({ id: cardOutput.id }),
     });
+
+    expect(
+      await createCardRequest(cardInput, token).then((res) => res.status),
+    ).toBe(201);
   });
 });
