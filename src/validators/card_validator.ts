@@ -30,7 +30,7 @@ export const card = z.object({
   priority: priority.nullish(),
   cover: z.string().nullish(),
   archived: z.boolean(),
-  dueDate: z.date().nullish(),
+  dueDate: dataValidator,
   updatedAt: dataValidator,
   createdAt: dataValidator,
   columnId: z.string().min(1).trim(),
