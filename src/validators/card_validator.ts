@@ -54,6 +54,7 @@ export const createInput = card
   .partial({
     createdAt: true,
     updatedAt: true,
+    dueDate: true,
   })
   .extend({
     activity: activity.partial().required({ action: true }),
@@ -76,6 +77,7 @@ export const createDbInput = card
   .partial({
     createdAt: true,
     updatedAt: true,
+    dueDate: true,
   })
   .extend({ labels: z.number().int().positive().array().optional() })
   .extend({
