@@ -1,8 +1,12 @@
-# Backend do Projeto KanbanBoard, projeto da disciplina de Metodologia Ágil
+# Backend do Projeto KanBoard, projeto da disciplina de Metodologia Ágil
+
+[Repositório do Frontend](https://github.com/darllangomes/KanBoard)
+
+[Deploy do frontend](https://kan-board.vercel.app/)
+
+[Deploy do backend ](https://kanbanboard-nj8m.onrender.com/)
 
 Usaremos o Postman para testar essa API. [Visualize online](https://www.postman.com/hovet-api/workspace/kanban/request/15002403-7bcf34d0-a9b7-476d-9740-24f185b1e101). Ele foi configurado para armazenar o token recebido no login e utilizá-lo nas rotas que exigem autorização.
-
-O deploy do backend foi feito nesse link https://kanbanboard-nj8m.onrender.com/
 
 ## Instalação
 
